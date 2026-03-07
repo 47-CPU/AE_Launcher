@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "updated": "2025-01-01",
+  "scripts": [
+    {
+      "id": "example-script",
+      "name": "サンプルスクリプト",
+      "description": "これはサンプルです。registry.jsonを編集して実際のスクリプト情報に置き換えてください。",
+      "version": "1.0.0",
+      "type": "script",
+      "category": "utility",
+      "free": true,
+      "file_name": "ExampleScript.jsx",
+      "download_url": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/scripts/example-script/ExampleScript.jsx",
+      "changelog": "初回リリース",
+      "updated": "2025-01-01"
+    }
+  ]
+}

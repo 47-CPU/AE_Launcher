@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src https:;">
+<title>AE Script Launcher</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0d0d0f;
+  --surface: #141418;
+  --surface2: #1c1c22;
+  --border: #2a2a35;
+  --accent: #7b61ff;
+  --accent2: #ff6b6b;
+  --text: #e8e8f0;
+  --text-muted: #6b6b80;
+  --text-dim: #3a3a50;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --titlebar: 28px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+
+/* ── TITLEBAR (mac drag area) ── */
+.titlebar {
+  height: var(--titlebar);
+  -webkit-app-region: drag;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.titlebar-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-left: 72px; /* mac traffic lights space */
+  letter-spacing: 0.5px;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(13,13,15,0.95);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.logo-mark {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; color: white;
+}
+
+.header-path {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface2);
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  -webkit-app-region: no-drag;
+}
+.header-path:hover { border-color: var(--accent); }
+
+.header-right { display:flex; gap:8px; align-items:center; -webkit-app-region: no-drag; }
+
+/* ── LAYOUT ── */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+nav.sidebar {
+  width: 188px;
+  flex-shrink: 0;
+  padding: 16px 12px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.nav-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 8px 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  border: 1px solid transparent;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active {
+  background: rgba(123,97,255,0.12);
+  color: var(--accent);
+  border-color: rgba(123,97,255,0.2);
+}
+.nav-icon { font-size: 14px; }
+.nav-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--accent);
+  color: white;
+  padding: 1px 6px;
+  border-radius: 8px;
+  min-width: 20px;
+  text-align: center;
+}
+.nav-badge.warn { background: var(--warning); color: #000; }
+
+/* ── MAIN ── */
+main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.section-title { font-size: 20px; font-weight: 800; letter-spacing: -0.6px; }
+.section-sub { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+/* ── STATS ── */
+.stats-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.stat:nth-child(1)::before { background: var(--accent); }
+.stat:nth-child(2)::before { background: var(--success); }
+.stat:nth-child(3)::before { background: var(--warning); }
+.stat-val { font-size: 24px; font-weight: 800; letter-spacing: -0.8px; line-height: 1; margin-bottom: 3px; }
+.stat-lbl { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.search-wrap { position: relative; flex: 1; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px; }
+input[type="text"] {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 12px 8px 30px;
+  border-radius: 7px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus { border-color: var(--accent); }
+
+.chips { display: flex; gap: 5px; }
+.chip {
+  font-family: var(--sans);
+  font-size: 11px; font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+/* ── SCRIPT GRID ── */
+.script-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.card:hover {
+  border-color: rgba(123,97,255,0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; gap:8px; }
+.card-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.card-badges { display:flex; flex-direction:column; gap:3px; align-items:flex-end; }
+
+.badge {
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+.b-free     { background: rgba(74,222,128,0.1);  color: var(--success); border: 1px solid rgba(74,222,128,0.2); }
+.b-inst     { background: rgba(123,97,255,0.1);  color: var(--accent);  border: 1px solid rgba(123,97,255,0.2); }
+.b-upd      { background: rgba(251,191,36,0.1);  color: var(--warning); border: 1px solid rgba(251,191,36,0.2); }
+.b-type     { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+
+.card-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.2px; }
+.card-desc {
+  font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.card-footer { display:flex; align-items:center; justify-content:space-between; }
+.card-ver { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+
+.btn-card {
+  font-family: var(--sans);
+  font-size: 11px; font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.2px;
+}
+.bc-install  { background: var(--accent); color: white; }
+.bc-install:hover { background: #9580ff; box-shadow: 0 3px 10px rgba(123,97,255,0.4); }
+.bc-update   { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+.bc-update:hover { background: var(--warning); color: #000; }
+.bc-installed { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); cursor: default; }
+.bc-loading  { background: rgba(123,97,255,0.15); color: var(--accent); cursor: not-allowed; }
+
+/* ── PROGRESS ── */
+.prog-wrap { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; display: none; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0; transition: width 0.3s; }
+
+/* ── LIST ITEM (installed/updates) ── */
+.list-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.list-item:hover { border-color: rgba(123,97,255,0.3); }
+.list-icon { font-size: 22px; }
+.list-info { flex: 1; min-width: 0; }
+.list-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.list-meta { font-family: var(--mono); font-size: 10px; color: var(--text-muted); display:flex; gap:10px; flex-wrap: wrap; }
+.list-path { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
+.list-actions { display:flex; gap:6px; flex-shrink: 0; }
+
+.btn-sm {
+  font-family: var(--sans);
+  font-size: 11px; font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.bs-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.bs-ghost:hover { border-color: var(--accent); color: var(--text); }
+.bs-danger { background: transparent; color: var(--accent2); border: 1px solid rgba(255,107,107,0.3); }
+.bs-danger:hover { background: rgba(255,107,107,0.1); }
+.bs-update { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+.bs-update:hover { background: var(--warning); color: #000; }
+.bs-primary { background: var(--accent); color: white; border: none; }
+.bs-primary:hover { background: #9580ff; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+}
+.empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+.empty-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.empty-sub { font-size: 12px; line-height: 1.6; }
+
+/* ── SETTINGS ── */
+.settings-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 12px;
+}
+.settings-block-title {
+  font-size: 13px; font-weight: 700;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-lbl { font-size: 12px; font-weight: 600; }
+.settings-row-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+.path-row { display:flex; gap:6px; align-items:center; }
+.path-row input { flex:1; font-family: var(--mono); font-size: 11px; padding-left: 10px; }
+
+.ae-detected {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+.ae-detected-title { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; margin-bottom: 6px; }
+.ae-version-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.ae-version-item:last-child { border-bottom: none; }
+
+/* ── MODAL ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  width: 500px;
+  max-width: 90vw;
+  transform: translateY(8px);
+  transition: transform 0.2s;
+}
+.overlay.open .modal { transform: translateY(0); }
+.modal-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.4px; }
+.modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+.form-label { display:block; font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
+.form-group { margin-bottom: 14px; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top: 20px; }
+
+/* ── HINT BOX ── */
+.hint {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.hint-title { font-size: 9px; font-weight: 700; color: var(--accent); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 5px; }
+.hint-line { font-family: var(--mono); font-size: 10px; color: var(--text-muted); padding: 2px 0; line-height: 1.4; }
+.hint-os { color: var(--warning); }
+
+/* ── TOAST ── */
+.toasts {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  z-index: 999;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.toast {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12px; font-weight: 600;
+  max-width: 300px;
+  transform: translateX(60px); opacity: 0;
+  transition: all 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast.success { border-left-color: var(--success); }
+.toast.error   { border-left-color: var(--accent2); }
+.toast.warning { border-left-color: var(--warning); }
+
+/* ── LOADING SPIN ── */
+.spin {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(123,97,255,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- TITLEBAR -->
+<div class="titlebar">
+  <span class="titlebar-title">AE Script Launcher</span>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">AE</div>
+    Script Launcher
+  </div>
+  <div class="header-right">
+    <div class="header-path" id="headerPath" onclick="openSetup()" title="クリックして変更">
+      設定が必要です
+    </div>
+    <button class="btn-sm bs-ghost" onclick="doRefresh()">🔄 更新</button>
+  </div>
+</header>
+
+<!-- BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-label">ライブラリ</div>
+    <div class="nav-item active" onclick="nav('browse')" data-page="browse">
+      <span class="nav-icon">📦</span> ブラウズ
+      <span class="nav-badge" id="nb-total">0</span>
+    </div>
+    <div class="nav-item" onclick="nav('installed')" data-page="installed">
+      <span class="nav-icon">✅</span> インストール済
+      <span class="nav-badge" id="nb-inst">0</span>
+    </div>
+    <div class="nav-item" onclick="nav('updates')" data-page="updates">
+      <span class="nav-icon">⚡</span> アップデート
+      <span class="nav-badge warn" id="nb-upd" style="display:none">0</span>
+    </div>
+    <div class="nav-label">システム</div>
+    <div class="nav-item" onclick="nav('settings')" data-page="settings">
+      <span class="nav-icon">⚙️</span> 設定
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ── BROWSE ── -->
+    <div id="page-browse" class="page active">
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-lbl">利用可能</div></div>
+        <div class="stat"><div class="stat-val" id="s-inst">—</div><div class="stat-lbl">インストール済</div></div>
+        <div class="stat"><div class="stat-val" id="s-upd">—</div><div class="stat-lbl">アップデート</div></div>
+      </div>
+
+      <div class="section-header">
+        <h1 class="section-title">スクリプト一覧</h1>
+        <span class="section-sub" id="grid-count">読み込み中...</span>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="検索..." oninput="filterGrid()">
+        </div>
+        <div class="chips">
+          <button class="chip active" onclick="setFilter('all',this)">すべて</button>
+          <button class="chip" onclick="setFilter('script',this)">スクリプト</button>
+          <button class="chip" onclick="setFilter('plugin',this)">プラグイン</button>
+          <button class="chip" onclick="setFilter('preset',this)">プリセット</button>
+        </div>
+      </div>
+
+      <div class="script-grid" id="scriptGrid">
+        <div style="grid-column:1/-1">
+          <div class="empty">
+            <div class="spin" style="width:28px;height:28px;margin:0 auto 12px;border-width:3px"></div>
+            <div class="empty-title">読み込み中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INSTALLED ── -->
+    <div id="page-installed" class="page">
+      <div class="section-header">
+        <h1 class="section-title">インストール済み</h1>
+        <span class="section-sub" id="inst-count">0 件</span>
+      </div>
+      <div id="instList"></div>
+    </div>
+
+    <!-- ── UPDATES ── -->
+    <div id="page-updates" class="page">
+      <div class="section-header">
+        <h1 class="section-title">アップデート</h1>
+        <span class="section-sub" id="upd-count">—</span>
+      </div>
+      <div id="updList"></div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div id="page-settings" class="page">
+      <div class="section-header">
+        <h1 class="section-title">設定</h1>
+      </div>
+
+      <div class="settings-block">
+        <div class="settings-block-title">📁 インストール先</div>
+
+        <div id="aeDetected" class="ae-detected" style="display:none">
+          <div class="ae-detected-title">✅ 自動検出されたAfter Effects</div>
+          <div id="aeVersionList"></div>
+        </div>
+
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-lbl">Scripts フォルダ</div>
+            <div class="settings-row-sub">スクリプトのインストール先フォルダ</div>
+          </div>
+        </div>
+        <div class="path-row" style="margin-top:8px">
+          <input type="text" id="pathInput" placeholder="/Applications/Adobe After Effects 2024/Scripts/ScriptUI Panels">
+          <button class="btn-sm bs-ghost" onclick="browseFolder()">参照</button>
+          <button class="btn-sm bs-primary" onclick="savePath()">保存</button>
+        </div>
+
+        <div class="hint" style="margin-top:12px;margin-bottom:0">
+          <div class="hint-title">標準パス</div>
+          <div class="hint-line"><span class="hint-os">Mac: </span>/Applications/Adobe After Effects 2024/Scripts/ScriptUI Panels</div>
+          <div class="hint-line"><span class="hint-os">Win: </span>C:\Program Files\Adobe\Adobe After Effects 2024\Support Files\Scripts\ScriptUI Panels</div>
+        </div>
+      </div>
+
+      <div class="settings-block">
+        <div class="settings-block-title">🌐 レジストリ</div>
+        <div class="path-row">
+          <input type="text" id="regInput" placeholder="https://raw.githubusercontent.com/..." style="font-family:var(--mono);font-size:11px">
+          <button class="btn-sm bs-primary" onclick="saveReg()">保存</button>
+        </div>
+      </div>
+
+      <div class="settings-block">
+        <div class="settings-block-title">ℹ️ 情報</div>
+        <div class="settings-row">
+          <div><div class="settings-row-lbl">バージョン</div></div>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)" id="appVersion">—</span>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-lbl">インストール履歴をクリア</div>
+            <div class="settings-row-sub">ファイルは削除されません</div>
+          </div>
+          <button class="btn-sm bs-danger" onclick="clearInstalled()">クリア</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- SETUP MODAL -->
+<div class="overlay" id="setupOverlay">
+  <div class="modal">
+    <div class="modal-title">⚙️ 初期設定</div>
+    <div class="modal-sub">
+      初回設定を行います。<br>
+      After Effectsのバージョンは自動検出されます。
+    </div>
+
+    <div id="modalDetected"></div>
+
+    <div class="form-group">
+      <label class="form-label">Scripts フォルダパス</label>
+      <div class="path-row">
+        <input type="text" id="modalPath" placeholder="自動検出されない場合は手動で入力">
+        <button class="btn-sm bs-ghost" onclick="modalBrowse()">参照</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">レジストリURL</label>
+      <input type="text" id="modalReg" placeholder="https://raw.githubusercontent.com/YOUR_USER/YOUR_REPO/main/registry.json" style="font-family:var(--mono);font-size:11px">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-sm bs-ghost" onclick="closeSetup()">スキップ</button>
+      <button class="btn-sm bs-primary" onclick="saveSetup()">保存して開始</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+const S = {
+  scripts: [],
+  installed: {},   // { id: { version, installedAt, filePath } }
+  settings: { scriptsPath: '', registryUrl: '' },
+  filter: 'all',
+  search: ''
+};
+
+const ICONS = { script:'📜', plugin:'🔌', preset:'🎨', expression:'✨', template:'📐', utility:'🛠️' };
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+async function init() {
+  S.settings  = await window.ae.loadSettings()  || S.settings;
+  S.installed = await window.ae.loadInstalled() || {};
+
+  const ver = await window.ae.getVersion();
+  document.getElementById('appVersion').textContent = 'v' + ver;
+
+  if (S.settings.scriptsPath) {
+    document.getElementById('headerPath').textContent = S.settings.scriptsPath;
+    document.getElementById('pathInput').value = S.settings.scriptsPath;
+  }
+  if (S.settings.registryUrl) {
+    document.getElementById('regInput').value = S.settings.registryUrl;
+  }
+
+  // Auto-detect AE
+  const aePaths = await window.ae.detectAePaths();
+  if (aePaths.length > 0) renderAeDetected(aePaths);
+
+  if (!S.settings.scriptsPath || !S.settings.registryUrl) {
+    await openSetupWithDetect();
+  } else {
+    await fetchRegistry(S.settings.registryUrl);
+  }
+}
+
+// ══════════════════════════════════════════════
+// AE AUTO-DETECT
+// ══════════════════════════════════════════════
+function renderAeDetected(paths) {
+  // Settings page
+  const box  = document.getElementById('aeDetected');
+  const list = document.getElementById('aeVersionList');
+  box.style.display = 'block';
+  list.innerHTML = paths.map(p => `
+    <div class="ae-version-item">
+      <span>After Effects ${p.year}</span>
+      <button class="btn-sm bs-ghost" onclick="selectAePath('${p.path.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">使用する</button>
+    </div>`).join('');
+}
+
+function selectAePath(p) {
+  document.getElementById('pathInput').value = p;
+  document.getElementById('modalPath').value = p;
+}
+
+async function openSetupWithDetect() {
+  const aePaths = await window.ae.detectAePaths();
+  const box = document.getElementById('modalDetected');
+
+  if (aePaths.length > 0) {
+    box.innerHTML = `
+      <div class="ae-detected" style="margin-bottom:14px">
+        <div class="ae-detected-title">✅ After Effects を自動検出しました</div>
+        ${aePaths.map(p=>`
+          <div class="ae-version-item">
+            <span>After Effects ${p.year}</span>
+            <button class="btn-sm bs-ghost" onclick="selectAePath('${p.path.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">選択</button>
+          </div>`).join('')}
+      </div>`;
+    // Auto-select first
+    document.getElementById('modalPath').value = aePaths[0].path;
+  } else {
+    box.innerHTML = `
+      <div class="hint" style="margin-bottom:14px">
+        <div class="hint-title">⚠️ AEが自動検出されませんでした</div>
+        <div class="hint-line">手動でパスを入力してください</div>
+      </div>`;
+  }
+
+  if (S.settings.registryUrl) document.getElementById('modalReg').value = S.settings.registryUrl;
+  document.getElementById('setupOverlay').classList.add('open');
+}
+
+function openSetup() { openSetupWithDetect(); }
+function closeSetup() { document.getElementById('setupOverlay').classList.remove('open'); }
+
+async function saveSetup() {
+  const path = document.getElementById('modalPath').value.trim();
+  const url  = document.getElementById('modalReg').value.trim();
+  if (!path) { toast('インストールパスを入力してください', 'error'); return; }
+  if (!url)  { toast('レジストリURLを入力してください', 'error'); return; }
+
+  S.settings.scriptsPath  = path;
+  S.settings.registryUrl  = url;
+  await window.ae.saveSettings(S.settings);
+
+  document.getElementById('headerPath').textContent = path;
+  document.getElementById('pathInput').value = path;
+  document.getElementById('regInput').value  = url;
+
+  closeSetup();
+  toast('設定を保存しました', 'success');
+  await fetchRegistry(url);
+}
+
+async function savePath() {
+  const p = document.getElementById('pathInput').value.trim();
+  if (!p) return;
+  S.settings.scriptsPath = p;
+  await window.ae.saveSettings(S.settings);
+  document.getElementById('headerPath').textContent = p;
+  toast('保存しました', 'success');
+}
+
+async function saveReg() {
+  const u = document.getElementById('regInput').value.trim();
+  if (!u) return;
+  S.settings.registryUrl = u;
+  await window.ae.saveSettings(S.settings);
+  await fetchRegistry(u);
+  toast('レジストリを更新しました', 'success');
+}
+
+async function browseFolder() {
+  const p = await window.ae.browseFolder();
+  if (p) { document.getElementById('pathInput').value = p; }
+}
+async function modalBrowse() {
+  const p = await window.ae.browseFolder();
+  if (p) { document.getElementById('modalPath').value = p; }
+}
+
+// ══════════════════════════════════════════════
+// REGISTRY
+// ══════════════════════════════════════════════
+async function fetchRegistry(url) {
+  setGridLoading();
+  const res = await window.ae.fetchRegistry(url);
+  if (!res.ok) {
+    setGridError(res.error);
+    toast('レジストリの読み込みに失敗しました', 'error');
+    return;
+  }
+  S.scripts = res.data.scripts || [];
+  renderAll();
+  toast(`${S.scripts.length} 件のスクリプトを読み込みました`, 'success');
+}
+
+async function doRefresh() {
+  if (!S.settings.registryUrl) { toast('レジストリURLを設定してください', 'warning'); return; }
+  await fetchRegistry(S.settings.registryUrl);
+}
+
+function setGridLoading() {
+  document.getElementById('scriptGrid').innerHTML = `
+    <div style="grid-column:1/-1">
+      <div class="empty">
+        <div class="spin" style="width:28px;height:28px;margin:0 auto 12px;border-width:3px"></div>
+        <div class="empty-title">読み込み中...</div>
+      </div>
+    </div>`;
+}
+
+function setGridError(msg) {
+  document.getElementById('scriptGrid').innerHTML = `
+    <div style="grid-column:1/-1">
+      <div class="empty">
+        <div class="empty-icon">❌</div>
+        <div class="empty-title">読み込みに失敗しました</div>
+        <div class="empty-sub" style="font-family:var(--mono);font-size:11px">${msg}</div>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function renderAll() {
+  renderGrid();
+  renderInstalled();
+  renderUpdates();
+  updateStats();
+}
+
+function filtered() {
+  return S.scripts.filter(s => {
+    const okF = S.filter === 'all' || s.type === S.filter;
+    const q   = S.search.toLowerCase();
+    const okS = !q || s.name.toLowerCase().includes(q) || (s.description||'').toLowerCase().includes(q);
+    return okF && okS;
+  });
+}
+
+function renderGrid() {
+  const grid = document.getElementById('scriptGrid');
+  const list = filtered();
+  document.getElementById('grid-count').textContent = list.length + ' 件';
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">見つかりません</div></div></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(s => cardHTML(s)).join('');
+}
+
+function cardHTML(s) {
+  const inst = S.installed[s.id];
+  const upd  = inst && cmpVer(s.version, inst.version) > 0;
+  const icon = ICONS[s.type] || ICONS[s.category] || '📄';
+  let btnCls = 'bc-install', btnTxt = 'インストール';
+  if (inst && !upd) { btnCls = 'bc-installed'; btnTxt = 'インストール済'; }
+  if (upd)          { btnCls = 'bc-update';    btnTxt = 'アップデート'; }
+
+  return `
+  <div class="card" id="card-${s.id}">
+    <div class="card-top">
+      <div class="card-icon">${icon}</div>
+      <div class="card-badges">
+        <span class="badge b-free">FREE</span>
+        <span class="badge b-type">${s.type||'script'}</span>
+        ${inst  ? '<span class="badge b-inst">✓ 導入済</span>' : ''}
+        ${upd   ? `<span class="badge b-upd">↑ ${s.version}</span>` : ''}
+      </div>
+    </div>
+    <div class="card-name">${s.name}</div>
+    <div class="card-desc">${s.description||''}</div>
+    <div class="card-footer">
+      <span class="card-ver">v${s.version}</span>
+      <button class="btn-card ${btnCls}" id="btn-${s.id}"
+        onclick="${btnCls!=='bc-installed'?`doInstall('${s.id}')`:''}"
+        ${btnCls==='bc-installed'?'disabled':''}>
+        ${btnTxt}
+      </button>
+    </div>
+    <div class="prog-wrap" id="pw-${s.id}"><div class="prog-fill" id="pf-${s.id}"></div></div>
+  </div>`;
+}
+
+function renderInstalled() {
+  const el   = document.getElementById('instList');
+  const keys = Object.keys(S.installed);
+  document.getElementById('inst-count').textContent = keys.length + ' 件';
+  document.getElementById('nb-inst').textContent    = keys.length;
+
+  if (!keys.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">まだインストールされていません</div><div class="empty-sub">ブラウズからインストールしてください</div></div>`;
+    return;
+  }
+  el.innerHTML = keys.map(id => {
+    const inst = S.installed[id];
+    const sc   = S.scripts.find(s=>s.id===id) || { name: id, type: 'script' };
+    const icon = ICONS[sc.type] || '📄';
+    return `
+    <div class="list-item">
+      <span class="list-icon">${icon}</span>
+      <div class="list-info">
+        <div class="list-name">${sc.name||id}</div>
+        <div class="list-meta"><span>v${inst.version}</span><span>${inst.installedAt||'—'}</span></div>
+        <div class="list-path">${inst.filePath||'—'}</div>
+      </div>
+      <div class="list-actions">
+        <button class="btn-sm bs-ghost" onclick="openFolder('${(inst.filePath||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')">📂</button>
+        <button class="btn-sm bs-danger" onclick="doUninstall('${id}')">削除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderUpdates() {
+  const el   = document.getElementById('updList');
+  const list = S.scripts.filter(s => { const i=S.installed[s.id]; return i && cmpVer(s.version,i.version)>0; });
+  document.getElementById('upd-count').textContent = list.length + ' 件';
+  const badge = document.getElementById('nb-upd');
+  badge.textContent = list.length;
+  badge.style.display = list.length > 0 ? '' : 'none';
+
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">✨</div><div class="empty-title">すべて最新です</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(s => {
+    const i = S.installed[s.id];
+    const icon = ICONS[s.type]||'📄';
+    return `
+    <div class="list-item">
+      <span class="list-icon">${icon}</span>
+      <div class="list-info">
+        <div class="list-name">${s.name}</div>
+        <div class="list-meta">
+          <span style="color:var(--text-muted)">v${i.version}</span>
+          <span>→</span>
+          <span style="color:var(--warning)">v${s.version}</span>
+        </div>
+        ${s.changelog?`<div style="font-size:10px;color:var(--text-muted);margin-top:3px">📝 ${s.changelog}</div>`:''}
+      </div>
+      <div class="list-actions">
+        <button class="btn-sm bs-update" onclick="doInstall('${s.id}')">アップデート</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const instCnt = Object.keys(S.installed).length;
+  const updCnt  = S.scripts.filter(s=>{ const i=S.installed[s.id]; return i&&cmpVer(s.version,i.version)>0; }).length;
+  document.getElementById('s-total').textContent = S.scripts.length;
+  document.getElementById('s-inst').textContent  = instCnt;
+  document.getElementById('s-upd').textContent   = updCnt;
+  document.getElementById('nb-total').textContent = S.scripts.length;
+}
+
+// ══════════════════════════════════════════════
+// INSTALL / UNINSTALL
+// ══════════════════════════════════════════════
+async function doInstall(id) {
+  if (!S.settings.scriptsPath) { toast('インストールパスを設定してください', 'error'); openSetup(); return; }
+  const sc = S.scripts.find(s=>s.id===id);
+  if (!sc) return;
+
+  const btn = document.getElementById('btn-'+id);
+  const pw  = document.getElementById('pw-'+id);
+  const pf  = document.getElementById('pf-'+id);
+
+  if (btn) { btn.className='btn-card bc-loading'; btn.textContent='インストール中...'; btn.disabled=true; }
+  if (pw)  pw.style.display='block';
+  if (pf)  pf.style.width='30%';
+
+  const res = await window.ae.installScript({
+    script: sc,
+    installDir: S.settings.scriptsPath
+  });
+
+  if (pf) pf.style.width='100%';
+
+  if (!res.ok) {
+    toast('インストール失敗: ' + res.error, 'error');
+    if (btn) { btn.className='btn-card bc-install'; btn.textContent='インストール'; btn.disabled=false; }
+    if (pw)  pw.style.display='none';
+    return;
+  }
+
+  S.installed[id] = {
+    version: sc.version,
+    installedAt: new Date().toLocaleDateString('ja-JP'),
+    filePath: res.path
+  };
+  await window.ae.saveInstalled(S.installed);
+
+  setTimeout(() => {
+    if (pw) pw.style.display='none';
+    renderAll();
+    toast(`✅ ${sc.name} をインストールしました`, 'success');
+  }, 400);
+}
+
+async function doUninstall(id) {
+  const sc   = S.scripts.find(s=>s.id===id);
+  const name = sc ? sc.name : id;
+  const inst = S.installed[id];
+  if (!confirm(`「${name}」をアンインストールしますか？\nファイルも削除されます。`)) return;
+
+  if (inst?.filePath) {
+    await window.ae.uninstallScript({ filePath: inst.filePath });
+  }
+  delete S.installed[id];
+  await window.ae.saveInstalled(S.installed);
+  renderAll();
+  toast(`${name} を削除しました`, 'success');
+}
+
+async function openFolder(p) {
+  if (!p) return;
+  const dir = p.replace(/[/\\][^/\\]+$/, '');
+  await window.ae.openFolder(dir);
+}
+
+async function clearInstalled() {
+  if (!confirm('インストール履歴をクリアしますか？（ファイルは削除されません）')) return;
+  S.installed = {};
+  await window.ae.saveInstalled(S.installed);
+  renderAll();
+  toast('クリアしました', 'success');
+}
+
+// ══════════════════════════════════════════════
+// NAV / FILTER
+// ══════════════════════════════════════════════
+function nav(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelector('[data-page="'+name+'"]').classList.add('active');
+}
+
+function setFilter(f, el) {
+  S.filter = f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderGrid();
+}
+
+function filterGrid() {
+  S.search = document.getElementById('searchInput').value;
+  renderGrid();
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function cmpVer(a, b) {
+  const pa=String(a).split('.').map(Number), pb=String(b).split('.').map(Number);
+  for (let i=0;i<Math.max(pa.length,pb.length);i++) {
+    const d=(pa[i]||0)-(pb[i]||0);
+    if (d!==0) return d;
+  }
+  return 0;
+}
+
+function toast(msg, type='', dur=3000) {
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className='toast '+(type||'');
+  el.textContent=msg;
+  c.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); }, dur);
+}
+
+document.getElementById('setupOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeSetup(); });
+
+init();
+</script>
+</body>
+</html>
