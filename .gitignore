@@ -1,1 +1,9 @@
+node_modules/
 .DS_Store
+src/
+package.json
+package-lock.json
+deploy.js
+update-registry.js
+bump-version.js
+README.md
