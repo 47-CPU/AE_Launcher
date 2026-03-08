@@ -11,7 +11,7 @@
       "category": "utility",
       "free": true,
       "file_name": "ExampleScript.jsx",
-      "download_url": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/scripts/example-script/ExampleScript.jsx",
+      "download_url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/ExampleScript.jsx",
       "changelog": "初回リリース",
       "updated": "2025-01-01"
     },
@@ -24,7 +24,7 @@
       "category": "utility",
       "free": true,
       "file_name": "Exp_Value_v2.0.jsxbin",
-      "download_url": "https://raw.githubusercontent.com/47-CPU/egistry.json/main/scripts/Exp_Value_v2.0.jsxbin",
+      "download_url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/Exp_Value_v2.0.jsxbin",
       "changelog": "初回リリース",
       "updated": "2026-03-07"
     },
@@ -37,7 +37,7 @@
       "category": "utility",
       "free": true,
       "file_name": "MK_Text_Beta.jsxbin",
-      "download_url": "https://raw.githubusercontent.com/47-CPU/egistry.json/main/scripts/MK_Text_Beta.jsxbin",
+      "download_url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/MK_Text_Beta.jsxbin",
       "changelog": "初回リリース",
       "updated": "2026-03-07"
     }
