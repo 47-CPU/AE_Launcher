@@ -17,6 +17,12 @@
       "tags": [
         "motion",
         "expression"
+      ],
+      "files": [
+        {
+          "path": "scripts/Exp_Value/Exp_Value.jsxbin",
+          "dest": "Scripts/ScriptUI Panels/"
+        }
       ]
     },
     {
@@ -30,7 +36,13 @@
       "file_name": "MK_Text_Beta.jsxbin",
       "download_url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/MK_Text_Beta.jsxbin",
       "changelog": "初回リリース",
-      "updated": "2026-03-07"
+      "updated": "2026-03-07",
+      "files": [
+        {
+          "path": "scripts/MK_Text_Beta/MK_Text_Beta.jsxbin",
+          "dest": "Scripts/ScriptUI Panels/"
+        }
+      ]
     },
     {
       "id": "Fx_Link",
