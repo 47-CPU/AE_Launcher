@@ -44,6 +44,43 @@
       "download_url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/MK_Text_Beta.jsxbin",
       "changelog": "初回リリース",
       "updated": "2026-03-07"
+    },
+    {
+      "id": "Fx_Link",
+      "name": "Fx_Link",
+      "description": "",
+      "version": "1.1.0",
+      "type": "scriptui",
+      "category": "utility",
+      "tags": [
+        "utility",
+        "expression"
+      ],
+      "free": true,
+      "files": [
+        {
+          "path": "scripts/Fx_Link/FL_icon/icon_copy.png",
+          "url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/Fx_Link/FL_icon/icon_copy.png",
+          "dest": "Scripts/ScriptUI Panels/FL_icon/"
+        },
+        {
+          "path": "scripts/Fx_Link/FL_icon/icon_link.png",
+          "url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/Fx_Link/FL_icon/icon_link.png",
+          "dest": "Scripts/ScriptUI Panels/FL_icon/"
+        },
+        {
+          "path": "scripts/Fx_Link/FL_icon/icon_unlink.png",
+          "url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/Fx_Link/FL_icon/icon_unlink.png",
+          "dest": "Scripts/ScriptUI Panels/FL_icon/"
+        },
+        {
+          "path": "scripts/Fx_Link/Fx_Link.jsxbin",
+          "url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/Fx_Link/Fx_Link.jsxbin",
+          "dest": "Scripts/ScriptUI Panels/"
+        }
+      ],
+      "changelog": "バグ修正",
+      "updated": "2026-03-10"
     }
   ]
 }
