@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2026-03-07",
+  "updated": "2026-03-10",
   "scripts": [
     {
       "id": "example-script",
@@ -17,7 +17,7 @@
     },
     {
       "id": "Exp_Value_v2.0",
-      "name": "Exp_Value_v2.0",
+      "name": "Exp_Value",
       "description": "",
       "version": "1.0.0",
       "type": "script",
@@ -26,7 +26,11 @@
       "file_name": "Exp_Value_v2.0.jsxbin",
       "download_url": "https://raw.githubusercontent.com/47-CPU/AE_Launcher/main/scripts/Exp_Value_v2.0.jsxbin",
       "changelog": "初回リリース",
-      "updated": "2026-03-07"
+      "updated": "2026-03-10",
+      "tags": [
+        "motion",
+        "expression"
+      ]
     },
     {
       "id": "MK_Text_Beta",
